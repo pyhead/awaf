@@ -1,2 +1,2 @@
 User-agent: *
-Disallow: /welcome/default/user
+Disallow: /
