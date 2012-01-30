@@ -10,3 +10,7 @@ __version__ = "0.2"
 __site__ = "http://globaleaks.org/"
 __copyright__ = '2012 Random Globaleaks Developers'
 __license__ = ''
+
+
+import os.path
+basepath = os.path.dirname(os.path.abspath(__file__))

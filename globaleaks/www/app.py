@@ -1,5 +1,10 @@
+import os.path
+
 import tornado.web
 import tornado.ioloop
+
+from globaleaks import basepath
+
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
@@ -55,6 +60,8 @@ class TipMaterialHandler(tornado.web.RequestHandler):
     """
 
 
+settings = dict(static_path = os.path.join(basepath, "static"),
+)
 
 application = tornado.web.Application([
     (r"^/$", IndexHandler),
@@ -63,8 +70,9 @@ application = tornado.web.Application([
     (r"^/tip/([\d\w]{5})/statistics$", TipHandler),
     # fuck shit this regexp doesnt work XXX
     (r"^/tip/([\d\w]{5})/comments/(\?([^#][\d\w]+))$", TipCommentsHandler),
-
-])
+    ],
+    **settings
+)
 
 
 if __name__ == '__main__':
