@@ -5,12 +5,16 @@ Handle the web app anonymity:
     - create a new hidden node
 """
 import socket
+import os.path
+import subprocess
 
 import socks
 from torctl import TorCtl
 
+from globaleaks import basepath
+
 _torpath = 'tor'
-_torport = 65264
+_torport = 55437
 
 
 def once(func):
@@ -26,12 +30,34 @@ def once(func):
     return decorator
 
 
+#@tor_running
 @once
 def start_tor():
     """
     Start tor daemon in a new process.
+    Return True in case of success, None whether tor seems already running,
+    Flase otherwise.
     """
-    raise NotImplementedError
+    basecmd = ('%(cmd)s -f %(torrc)s --HiddenServiceDir %(hiddir)s'
+               '--HiddenservicePort %(hidport)d localhost:%(port)d') % dict(
+                    cmd = _torpath,
+                    torrc = os.path.join(basepath, 'tor', 'torrc'),
+                    hiddir = os.path.join(basepath, 'tor', 'hiddenservice'),
+                    hidport = 80,
+                    port = _torport)
+
+    try:
+        proc = subprocess.Popen(('tor').split())
+    except OSError:
+        return False
+
+    for line in proc.stdout:
+        if 'Bootstrapped 100%:' in line:
+            return True
+        if '[err]' in line:
+            return False
+    else:
+        return proc.pid > 0 # proc should have a pid < 0 in case of failure.
 
 @once
 def torsocks():
@@ -45,10 +71,10 @@ def torsocks():
 def tor_running(func):
     """
     Closure for services requiring tor.
-    If tor is active, return func, a IOError raising function otherwise
+    If tor is active, return function funct, none otherwise
     """
     def no_tor(*args, **kwargs):
-        raise IOError('Tor not running')
+        return None
 
     conn = TorCtl.connect()
     if not conn:
@@ -69,7 +95,7 @@ class TorListener(object, TorCtl.PostEventListener):
 
         Return a new socketobject, None if launching tor daemon failed.
         """
-        conn = TorCtl.connect()
+        conn = TorCtl.connect(controlPort=_torport)
 
         if not conn and not start_tor():
             return None

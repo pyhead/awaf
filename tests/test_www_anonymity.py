@@ -46,7 +46,17 @@ class TestAnonimity(unittest.TestCase):
         except socket.gaierrror, e:
             self.fail('Unable to connect: <%s>' % str(e))
 
+    def test_torctl(self):
+        #anonymity.TorListener()
+        pass # WTF; Y U NO WORK
 
+    def test_starttor(self):
+        """
+        Ensure tor is working properly.
+        Note: this test assumes tor is not already started on your system.
+        """
+        exitcode = anonymity.start_tor()
+        self.assertTrue(exitcode)
 
 
 
