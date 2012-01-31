@@ -1,5 +1,7 @@
 import unittest
 import urllib
+import httplib
+import socket
 
 import tornado.web
 
@@ -23,7 +25,7 @@ class TestAnonimity(unittest.TestCase):
         try:
             urllib.urlopen('http://globaleaks.org')
         except IOError, e:
-            self.fail(str(e))
+            self.fail("Unable to connect: <%s>" % str(e))
 
 
         conn = urllib.urlopen('http://check.torproject.org')
@@ -33,10 +35,19 @@ class TestAnonimity(unittest.TestCase):
             elif 'Congratulations. Your browser is configured to use Tor' in line:
                 break
         else:
-            raise NotImplementedError
+            self.fail('Unable to determine tor status.')
 
         # ensure re-calling this funciton does not have side-effects
         anonymity.torsocks()
+        # changes on socket should affect every library socket based.
+        try:
+            conn = httplib.HTTPConnection('globaleaks.org')
+            conn.request('GET', '/index.html')
+        except socket.gaierrror, e:
+            self.fail('Unable to connect: <%s>' % str(e))
+
+
+
 
 
 if __name__ == '__main__':
