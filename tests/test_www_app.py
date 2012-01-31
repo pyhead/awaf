@@ -29,8 +29,8 @@ class TestWWWWApp(unittest.TestCase):
     def urlfor(self, *page):
         """
         Construct an url using keywords given.
-        XXX: use RequestHandler.static_url
         """
+        pint tornado.web.RequestHandler
         return 'http://localhost:%d/%s' % (self.port, '/'.join(page))
 
     def handle_request(self, message):

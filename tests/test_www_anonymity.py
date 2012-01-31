@@ -3,7 +3,7 @@ import urllib
 
 import tornado.web
 
-from globaleaks.www import anonimity
+from globaleaks.www import anonymity
 
 class TestAnonimity(unittest.TestCase):
     """
@@ -14,17 +14,16 @@ class TestAnonimity(unittest.TestCase):
         Create a new TorCtl.
         """
 
-
     def test_torsocks(self):
         """
         Once a new torctl is created -hence tor is running,
         perform various tests on the proxy.
         """
-        anonimity.torsocks()
+        anonymity.torsocks()
         try:
             urllib.urlopen('http://globaleaks.org')
-        except IOError:
-            self.fail("Unknown host globaleaks.org")
+        except IOError, e:
+            self.fail(str(e))
 
 
         conn = urllib.urlopen('http://check.torproject.org')
@@ -37,7 +36,7 @@ class TestAnonimity(unittest.TestCase):
             raise NotImplementedError
 
         # ensure re-calling this funciton does not have side-effects
-        anonimity.torsocks()
+        anonymity.torsocks()
 
 
 if __name__ == '__main__':

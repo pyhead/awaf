@@ -2,17 +2,6 @@ import tornado.database
 
 __all__ = ['Submission']
 
-@classmethod
-def escape_query(cls, func):
-    """
-    Decorator for accesses to database that require a layer of security.
-    """
-    def escape(key):
-        if '--' in key or '\'' in key or '\"' in key:
-            raise KeyError
-        else:
-            return func(key)
-
 
 class Submission(object):
     """

@@ -10,7 +10,7 @@ import socks
 from torctl import TorCtl
 
 _torpath = 'tor'
-_torport = 56323
+_torport = 65264
 
 
 def once(func):
@@ -91,4 +91,9 @@ class TorListener(object, TorCtl.PostEventListener):
     @property
     def running(self):
         return self._conn.is_alive()
+
+    @property
+    def has_hiddenservice(self):
+        """
+        """
 

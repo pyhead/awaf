@@ -60,7 +60,8 @@ class TipMaterialHandler(tornado.web.RequestHandler):
     """
 
 
-settings = dict(static_path = os.path.join(basepath, "static"),
+settings = dict(
+        static_path = os.path.join(basepath, "static"),
 )
 
 application = tornado.web.Application([
