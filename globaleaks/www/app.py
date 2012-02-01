@@ -3,7 +3,7 @@ import os.path
 import tornado.web
 import tornado.ioloop
 
-from globaleaks import basepath
+from globaleaks.www import config
 
 
 class IndexHandler(tornado.web.RequestHandler):
@@ -61,7 +61,7 @@ class TipMaterialHandler(tornado.web.RequestHandler):
 
 
 settings = dict(
-        static_path = os.path.join(basepath, "static"),
+        static_path = config.staticpath,
 )
 
 application = tornado.web.Application([

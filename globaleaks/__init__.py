@@ -12,5 +12,3 @@ __copyright__ = '2012 Random Globaleaks Developers'
 __license__ = ''
 
 
-import os.path
-basepath = os.path.dirname(os.path.abspath(__file__))

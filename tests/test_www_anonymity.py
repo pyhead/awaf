@@ -2,6 +2,7 @@ import unittest
 import urllib
 import httplib
 import socket
+import os
 
 import tornado.web
 
@@ -15,12 +16,33 @@ class TestAnonimity(unittest.TestCase):
         """
         Create a new TorCtl.
         """
+        self.tor = anonymity.TorListener()
 
-    def test_starttor(self):
+    def tearDown(self):
+        """
+        Delete current TorCtl instance.
+        """
+        del self.tor
+
+    def test_torctl(self):
+        # tor controller should be up and running
+        self.assertTrue(self.tor)
+
+
+    def TESTstart_tor(self):
         """
         Ensure tor is working properly.
         Note: this test assumes tor is not already started on your system.
         """
+        os.kill(self.tor._pid, signal.SIGKILL) # brutally kill tor
+
+        pid = anonymity.start_tor()
+        self.assertTrue(pid and pid > 0) # pid < 0 in case of failure
+        self.assertIsNone(anonymity.start_tor())
+
+        os.kill(pid, signal.SIGKILL)
+
+
         self.assertTrue(anonymity.start_tor())
         # once started, tor_start should return none everytime.
         self.assertIsNone(anonymity.start_tor())
@@ -30,7 +52,6 @@ class TestAnonimity(unittest.TestCase):
         Once a new torctl is created -hence tor is running,
         perform various tests on the proxy.
         """
-        anonymity.torsocks()
         try:
             urllib.urlopen('http://globaleaks.org')
         except IOError, e:
@@ -54,10 +75,6 @@ class TestAnonimity(unittest.TestCase):
             conn.request('GET', '/index.html')
         except socket.gaierrror, e:
             self.fail('Unable to connect: <%s>' % str(e))
-
-    def test_torctl(self):
-        #anonymity.TorListener()
-        pass # WTF; Y U NO WORK
 
 
 if __name__ == '__main__':

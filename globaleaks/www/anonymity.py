@@ -11,7 +11,7 @@ import subprocess
 import socks
 from torctl import TorCtl
 
-from globaleaks import basepath
+from globaleaks.www import config
 
 _torpath = '/Applications/TorBrowser_en-US.app/Contents/MacOS/tor'
 _torport = 9050
@@ -30,32 +30,33 @@ def once(func):
     return decorator
 
 
-#@tor_running
 @once
 def start_tor():
     """
     Start tor daemon in a new process.
-    Return True in case of success, None whether tor seems already running,
-    Flase otherwise.
+    Return tor process' pid in case of success, None whether tor seems already running,
+    False otherwise.
     """
     basecmd = ('%(cmd)s -f %(torrc)s --HiddenServiceDir %(hiddir)s '
                '--HiddenServicePort %(hidport)d') % dict(
-                    cmd = _torpath,
-                    torrc = os.path.join(basepath, '..', 'tor', 'torrc'),
-                    hiddir = os.path.join(basepath, '..', 'tor', 'hiddenservice'),
-                    hidport = 80,)
+                    cmd = config.torpath,
+                    torrc = config.torrc,
+                    hiddir = config.hiddir,
+                    hidport = config.hidport,
+                    )
 
     proc = subprocess.Popen(basecmd.split(),
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
 
     for line in iter(proc.stdout.readline, ''):
+        print line # XXX: log.debug when logging will be setted.
         if 'Bootstrapped 100%:' in line:
-            return True
+            return proc.pid
         if '[err]' in line:
             return False
     else:
-        return proc.pid > 0 # proc should have a pid < 0 in case of failure.
+        return proc.pid # proc should have a pid < 0 in case of failure.
 
 @once
 def torsocks():
@@ -76,7 +77,7 @@ def tor_running(func):
 
     conn = TorCtl.connect()
     if not conn:
-        return
+        return no_tor
     else:
         conn.close()
         return func
@@ -93,14 +94,36 @@ class TorListener(object, TorCtl.PostEventListener):
 
         Return a new socketobject, None if launching tor daemon failed.
         """
+        torpid = start_tor()
+        import time
+        time.sleep(10)
         conn = TorCtl.connect(controlPort=_torport)
 
-        if not conn and not start_tor():
-            return None
-        else:
+        if torpid:
+            cls._torpid = torpid
+        elif conn:
             cls._conn = conn
             conn.set_events(events or ["BW"])
             return super(cls, TorCtl.EventListener).__new__(*args, **kwargs)
+        else:
+            return None
+
+    def __nonzero__(self):
+        """
+        Return True if tor is active and torCtl is currently attached to it,
+        False otherwise.
+        """
+        return self._conn.is_alive()
+
+    def close(self):
+        """
+        Close tor process and listener.
+        """
+        if self:
+            self._conn.close()
+        if self._pid:
+            os.kill(self._pid, signal.SIGQUIT)
+    __del__ = close
 
     def brandwith_event(self, event):
         """
@@ -113,11 +136,6 @@ class TorListener(object, TorCtl.PostEventListener):
         """
 
     @property
-    def running(self):
-        return self._conn.is_alive()
-
-    @property
     def has_hiddenservice(self):
         """
         """
-
