@@ -13,8 +13,8 @@ from torctl import TorCtl
 
 from globaleaks import basepath
 
-_torpath = 'tor'
-_torport = 55437
+_torpath = '/Applications/TorBrowser_en-US.app/Contents/MacOS/tor'
+_torport = 9050
 
 
 def once(func):
@@ -38,20 +38,18 @@ def start_tor():
     Return True in case of success, None whether tor seems already running,
     Flase otherwise.
     """
-    basecmd = ('%(cmd)s -f %(torrc)s --HiddenServiceDir %(hiddir)s'
-               '--HiddenservicePort %(hidport)d localhost:%(port)d') % dict(
+    basecmd = ('%(cmd)s -f %(torrc)s --HiddenServiceDir %(hiddir)s '
+               '--HiddenServicePort %(hidport)d') % dict(
                     cmd = _torpath,
-                    torrc = os.path.join(basepath, 'tor', 'torrc'),
-                    hiddir = os.path.join(basepath, 'tor', 'hiddenservice'),
-                    hidport = 80,
-                    port = _torport)
+                    torrc = os.path.join(basepath, '..', 'tor', 'torrc'),
+                    hiddir = os.path.join(basepath, '..', 'tor', 'hiddenservice'),
+                    hidport = 80,)
 
-    try:
-        proc = subprocess.Popen(('tor').split())
-    except OSError:
-        return False
+    proc = subprocess.Popen(basecmd.split(),
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
 
-    for line in proc.stdout:
+    for line in iter(proc.stdout.readline, ''):
         if 'Bootstrapped 100%:' in line:
             return True
         if '[err]' in line:

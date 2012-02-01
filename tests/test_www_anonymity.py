@@ -16,6 +16,15 @@ class TestAnonimity(unittest.TestCase):
         Create a new TorCtl.
         """
 
+    def test_starttor(self):
+        """
+        Ensure tor is working properly.
+        Note: this test assumes tor is not already started on your system.
+        """
+        self.assertTrue(anonymity.start_tor())
+        # once started, tor_start should return none everytime.
+        self.assertIsNone(anonymity.start_tor())
+
     def test_torsocks(self):
         """
         Once a new torctl is created -hence tor is running,
@@ -49,15 +58,6 @@ class TestAnonimity(unittest.TestCase):
     def test_torctl(self):
         #anonymity.TorListener()
         pass # WTF; Y U NO WORK
-
-    def test_starttor(self):
-        """
-        Ensure tor is working properly.
-        Note: this test assumes tor is not already started on your system.
-        """
-        exitcode = anonymity.start_tor()
-        self.assertTrue(exitcode)
-
 
 
 if __name__ == '__main__':
