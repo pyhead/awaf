@@ -10,8 +10,9 @@ basepath, _ = os.path.dirname(os.path.abspath(__file__)).rsplit('globaleaks', 1)
 
 # tor configuration
 torpath = '/Applications/TorBrowser_en-US.app/Contents/MacOS/tor'
-torport = 9052
 torrc = os.path.join(basepath, 'tor', 'torrc')
+torport = 9050
+torctlport = 9051
 hiddir = os.path.join(basepath, 'tor', 'hiddenservice')
 hidport = 80
 

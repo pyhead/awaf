@@ -13,9 +13,6 @@ from torctl import TorCtl
 
 from globaleaks.www import config
 
-_torpath = '/Applications/TorBrowser_en-US.app/Contents/MacOS/tor'
-_torport = 9050
-
 
 def once(func):
     """
@@ -50,7 +47,7 @@ def start_tor():
                             stderr=subprocess.PIPE)
 
     for line in iter(proc.stdout.readline, ''):
-        print line # XXX: log.debug when logging will be setted.
+#        print line # XXX: log.debug when logging will be setted.
         if 'Bootstrapped 100%:' in line:
             return proc.pid
         if '[err]' in line:
@@ -63,7 +60,7 @@ def torsocks():
     """
     Change socket.socket to a socksproxy binded to tor proxy.
     """
-    socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "localhost", _torport)
+    socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "localhost", config.torport)
     socket.socket = socks.socksocket
 
 
@@ -86,7 +83,6 @@ class TorListener(object, TorCtl.PostEventListener):
     """
     Listener for tor events.
     """
-
     def __new__(cls, events=None, *args, **kwargs):
         """
         Before creating a new socket, we must check tor daemon is active, and
@@ -94,17 +90,20 @@ class TorListener(object, TorCtl.PostEventListener):
 
         Return a new socketobject, None if launching tor daemon failed.
         """
-        torpid = start_tor()
-        import time
-        time.sleep(10)
-        conn = TorCtl.connect(controlPort=_torport)
 
-        if torpid:
-            cls._torpid = torpid
-        elif conn:
+        torsocks()
+        cls.torpid = start_tor()
+        conn = TorCtl.connect(
+                controlAddr='localhost',
+                controlPort=config.torctlport,
+                passphrase=None
+        )
+
+        if conn is not None:
             cls._conn = conn
             conn.set_events(events or ["BW"])
-            return super(cls, TorCtl.EventListener).__new__(*args, **kwargs)
+            print 'hehr'
+            return object.__new__(cls, *args, **kwargs)
         else:
             return None
 
@@ -113,7 +112,8 @@ class TorListener(object, TorCtl.PostEventListener):
         Return True if tor is active and torCtl is currently attached to it,
         False otherwise.
         """
-        return self._conn.is_alive()
+        print self._conn.is_alive()
+        return self._conn.is_live()
 
     def close(self):
         """
@@ -121,7 +121,7 @@ class TorListener(object, TorCtl.PostEventListener):
         """
         if self:
             self._conn.close()
-        if self._pid:
+        if hasattr(self, '_pid'):
             os.kill(self._pid, signal.SIGQUIT)
     __del__ = close
 

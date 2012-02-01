@@ -26,15 +26,16 @@ class TestAnonimity(unittest.TestCase):
 
     def test_torctl(self):
         # tor controller should be up and running
-        self.assertTrue(self.tor)
+        self.assertTrue(bool(self.tor))
 
 
-    def TESTstart_tor(self):
+    def test_start_tor(self):
         """
         Ensure tor is working properly.
         Note: this test assumes tor is not already started on your system.
         """
-        os.kill(self.tor._pid, signal.SIGKILL) # brutally kill tor
+        # brutally reset start_tor.has_run
+        anonymity.start_tor.has_run = False
 
         pid = anonymity.start_tor()
         self.assertTrue(pid and pid > 0) # pid < 0 in case of failure
@@ -43,7 +44,7 @@ class TestAnonimity(unittest.TestCase):
         os.kill(pid, signal.SIGKILL)
 
 
-        self.assertTrue(anonymity.start_tor())
+        self.assertIsNone(anonymity.start_tor())
         # once started, tor_start should return none everytime.
         self.assertIsNone(anonymity.start_tor())
 
