@@ -4,7 +4,7 @@ import tornado.httpserver
 import tornado.httpclient
 import tornado.ioloop
 
-from globaleaks.www import app
+from www import app
 
 
 class TestWWWWApp(unittest.TestCase):
@@ -30,7 +30,6 @@ class TestWWWWApp(unittest.TestCase):
         """
         Construct an url using keywords given.
         """
-        pint tornado.web.RequestHandler
         return 'http://localhost:%d/%s' % (self.port, '/'.join(page))
 
     def handle_request(self, message):
@@ -54,4 +53,7 @@ class TestWWWWApp(unittest.TestCase):
 
         self.assertEqual(self.response.code, 200)
         self.assertEqual(self.response.request.url, self.urlfor(''))
+        self.assertNotEqual(self.response.body, '')
 
+if __name__ == '__main__':
+    unittest.main()
