@@ -21,8 +21,8 @@ class TestTor(unittest.TestCase):
 	self.assertIsNone(tor.start_tor())
 
 	# TODO: do something in order to kill the process and restart it?
-	# TODO: test a simple case of failure.
-        # brutally reset start_tor.has_run
+        
+	# brutally reset start_tor.has_run
         tor.start_tor.has_run = False
         self.assertFalse(tor.start_tor())
         # once started, tor_start should return none everytime.
@@ -61,10 +61,41 @@ class TestTor(unittest.TestCase):
             self.fail('Unable to connect: <%s>' % str(e))
 
 
-class TestTorCtl(unittest.TestCase):
+class TestTorListener(unittest.TestCase):
     """
     Test tor interface for event listeners.
     """
+    
+    def setUp(self):
+	"""
+	Set up a simple torctl listener.
+	"""
+	self.tor_listener = tor.TorListener()
+
+    def test_tor_running(self):
+	"""
+	Test tor_running decorator.
+	"""
+
+	@tor.tor_running
+	def inner(cheese):
+	    """
+	    Useless function which returns its argument
+	    """
+	    return cheese
+
+	self.assertEqual(inner('cheese'), 'cheese')
+
+	#TODO: stop tor and see if it works.
+
+    def test_bool(self):
+	"""
+	Assert the connection with tor is alive.
+	"""
+	self.assertTrue(self.tor_listener)
+	self.tor_listener.close()
+	self.assertFalse(self.tor_listener)
+    
 
 if __name__ == '__main__':
     unittest.main()
