@@ -5,13 +5,16 @@ Handle the web app anonymity:
     - create a new hidden node
 """
 import socket
-import os.path
 import subprocess
+import logging
 
 import socks
 from torctl import TorCtl
 
-from globaleaks.www import config
+from www import config
+
+logger = logging.getLogger('Tor Controller')
+logger.setLevel(logging.DEBUG)
 
 
 def once(func):
@@ -41,28 +44,33 @@ def start_tor():
                     hiddir = config.hiddir,
                     hidport = config.hidport,
                     )
-
-    proc = subprocess.Popen(basecmd.split(),
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
+    try:
+	proc = subprocess.Popen(basecmd.split(),
+	                        stdout=subprocess.PIPE,
+		                stderr=subprocess.PIPE)
+    except OSError:
+	logger.error('Unable to lunch command %s. Please edit config' % 
+		     config.torpath)
+	return None
 
     for line in iter(proc.stdout.readline, ''):
-#        print line # XXX: log.debug when logging will be setted.
+        logger.debug(line)
         if 'Bootstrapped 100%:' in line:
-            return proc.pid
+            return proc.pid > 0
         if '[err]' in line:
             return False
     else:
-        return proc.pid # proc should have a pid < 0 in case of failure.
+        return proc.pid > 0  # proc should have a pid < 0 in case of failure.
 
 @once
 def torsocks():
     """
     Change socket.socket to a socksproxy binded to tor proxy.
+    If the operation succeeds, return True, 
     """
     socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "localhost", config.torport)
     socket.socket = socks.socksocket
-
+    return True
 
 def tor_running(func):
     """
@@ -79,40 +87,36 @@ def tor_running(func):
         conn.close()
         return func
 
+
 class TorListener(object, TorCtl.PostEventListener):
     """
     Listener for tor events.
     """
-    def __new__(cls, events=None, *args, **kwargs):
+    def __init__(self, events=None, pid=None):
         """
-        Before creating a new socket, we must check tor daemon is active, and
-        otherwise lauch it.
-
-        Return a new socketobject, None if launching tor daemon failed.
+	Create a new set of socket.
         """
-
+        # start tor sockets
         torsocks()
-        cls.torpid = start_tor()
-        conn = TorCtl.connect(
-                controlAddr='localhost',
-                controlPort=config.torctlport,
-                passphrase=None
+        # start tor daemon
+	start_tor()
+
+        conn = TorCtl.connect(controlAddr='localhost',
+                	      controlPort=config.torctlport,
+                              passphrase=None
         )
 
         if conn is not None:
-            cls._conn = conn
-            conn.set_events(events or ["BW"])
-            print 'hehr'
-            return object.__new__(cls, *args, **kwargs)
+            self._conn = conn
+            self._conn.set_events(events or ["BW"])
         else:
-            return None
+	    raise IOError("Unexpected error when attaching to tor.")
 
     def __nonzero__(self):
         """
         Return True if tor is active and torCtl is currently attached to it,
         False otherwise.
         """
-        print self._conn.is_alive()
         return self._conn.is_live()
 
     def close(self):
@@ -121,9 +125,6 @@ class TorListener(object, TorCtl.PostEventListener):
         """
         if self:
             self._conn.close()
-        if hasattr(self, '_pid'):
-            os.kill(self._pid, signal.SIGQUIT)
-    __del__ = close
 
     def brandwith_event(self, event):
         """
@@ -133,9 +134,4 @@ class TorListener(object, TorCtl.PostEventListener):
     def logtorevent(self, event):
         """
         Log informations about events on tor stream.
-        """
-
-    @property
-    def has_hiddenservice(self):
-        """
         """

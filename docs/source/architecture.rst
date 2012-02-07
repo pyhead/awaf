@@ -215,15 +215,13 @@ The application let the user define the bind address of the application.
 By default the application only bind to 127.0.0.1 but it may be possible to bind it also on other IP address or 0.0.0.0 .
 
 - User interface
-````````````````
-
+```````````````
 The status of the node and the setup procedure should be configurable from a user interface.
 We should figure out the best way to present this, but at least insert into the application logic the fact that the user will be guided through
 a wizard to setup their node. They will also be shown the current status of the node.
 
 - Browser Startup
 `````````````````
-
 The application when started and initiatlized must automatically open the system browser on http://localhost:8080 (or other port where the tornadoweb listen)
 
 Security Features
@@ -231,7 +229,6 @@ Security Features
 
 Outbound Connection Torrification
 `````````````````````````````````
-
 The framework must automatically provide support to make anonymous outbound connection via Tor.
 The entire web application framework (Tornadoweb) should be forbidden to make any outbound connections directly and have all connections automatically torrified.
 A possible approach would be to directly override DNS Resolution and TCP outbound socks of Python interpreter using torsocks on Linux/OSX and torcap/freecap on Win32.
@@ -261,19 +258,7 @@ The build system must be as cross-platform as possible and must be able to deliv
 - OSX: MyApplication.app (inside an Application.dmg container)
 - Linux: Deb build
 
-- Win32 Builder
-
-Related links of possible base framework to use:
-- http://www.py2exe.org/
 - http://www.pyinstaller.org/
-
-- Mac OS X Builder
-
-On OSX it should be a self contained MyApplication.app with inside the python interpreter. Possible projects to look at are:
-py2app - http://svn.pythonmac.org/py2app/py2app/trunk/doc/index.html
-
-- Tor downloader
-The buildsystem should download latests release of Tor for the appropriate platform and extract the required files into the build structure, in order to be packaged within the application.
 
 Documentation
 -------------
