@@ -1,7 +1,9 @@
 # -*- mode: python -*-
 a = Analysis([os.path.join(HOMEPATH,'support/_mountzlib.py'), 
-              os.path.join(HOMEPATH,'support/useUnicode.py'), 'GLBackend/www/app.py'],
-              pathex=['/home/maker/dev/Globaleaks2'])
+              os.path.join(HOMEPATH,'support/useUnicode.py'), 
+              'www/app.py'],
+             excludes=['django'],
+             pathex=['/home/maker/dev/Globaleaks2/GLBackend'])
 pyz = PYZ(a.pure)
 exe = EXE(pyz,
           a.scripts,
