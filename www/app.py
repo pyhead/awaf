@@ -24,5 +24,8 @@ application = tornado.web.Application([
 )
 
 if __name__ == '__main__':
-    application.listen(8888)
+    from www.anonymity import tor
+    tor.torsocks()
+    tor.start_tor()
+    application.listen(config.hidport)
     tornado.ioloop.IOLoop.instance().start()

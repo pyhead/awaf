@@ -14,7 +14,7 @@ torrc = os.path.join(basepath, 'tor', 'torrc')
 torport = 9050
 torctlport = 9051
 hiddir = os.path.join(basepath, 'tor', 'hiddenservice')
-hidport = 80
+hidport = 8888
 
 # web application
 staticpath = os.path.join(basepath, 'static')
