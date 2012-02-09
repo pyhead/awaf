@@ -24,7 +24,6 @@ logger.setLevel(logging.DEBUG)
 __PID = None
 @property
 def pid(): 
-    print __PID
     return __PID
 
 def once(func):
