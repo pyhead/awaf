@@ -9,6 +9,7 @@ from __future__ import with_statement
 import socket
 import subprocess
 import logging
+import errno
 import os.path
 
 import socks
@@ -19,6 +20,9 @@ from www import config
 logger = logging.getLogger('Tor Controller')
 logger.setLevel(logging.DEBUG)
 
+# We are all adults, G Van Rossum
+# tor current process pid
+pid = None
 
 def once(func):
     """
@@ -32,6 +36,15 @@ def once(func):
     func.has_run = False
     return decorator
 
+def tor_running(func):
+    """
+    Closure for services requiring tor.
+    If tor is active, return function func, None otherwise
+    """
+    def no_tor(*args, **kwargs):
+        return None
+    return func if pid else no_tor
+
 
 @once
 def start_tor():
@@ -40,6 +53,8 @@ def start_tor():
     Return tor process' pid in case of success, None whether tor seems already running,
     False otherwise.
     """
+    global pid
+
     basecmd = ('%(cmd)s -f %(torrc)s --HiddenServiceDir %(hiddir)s '
                '--HiddenServicePort %(hidport)d') % dict(
                     cmd = config.torpath,
@@ -59,10 +74,12 @@ def start_tor():
     for line in iter(proc.stdout.readline, ''):
         logger.debug(line)
         if 'Bootstrapped 100%:' in line:
+            pid = proc.pid
             return proc.pid > 0
         if '[err]' in line:
             return False
     else:
+        pid = proc.pid
         return proc.pid > 0  # proc should have a pid < 0 in case of failure.
 
 @once
@@ -75,23 +92,7 @@ def torsocks():
     socket.socket = socks.socksocket
     return True
 
-def tor_running(func):
-    """
-    Closure for services requiring tor.
-    If tor is active, return function funct, none otherwise
-    """
-    def no_tor(*args, **kwargs):
-        return None
-
-    conn = TorCtl.connect()
-    if not conn:
-        return no_tor
-    else:
-        conn.close()
-        return func
-
-#@tor_running
-#@classmethod
+@tor_running
 def get_hiddenurl():
     """
     Retrive the onion url from hiddenservice directory specified in www.config.
@@ -100,66 +101,4 @@ def get_hiddenurl():
     """
     with open(os.path.join(config.hiddir, 'hostname')) as f:
         url = f.readline().strip()
-
-    if not url or not url.endswith('.onion'):
-        return None
-    else:
-        return url
-
-def get_hiddenpkey():
-    with open(os.path.join(config.hiddir, 'hostname')) as f:
-        url = f.readline().strip()
-
-    if not url or not url.endswith('.onion'):
-        return None
-    else:
-        return url
-
-
-class TorListener(TorCtl.PostEventListener):
-    """
-    Listener for tor events.
-    """
-    def __init__(self, events=None):
-        """
-	Create a new set of socket.
-        """
-        # start tor sockets
-        torsocks()
-        # start tor daemon
-	start_tor()
-
-        conn = TorCtl.connect(controlAddr='localhost',
-                	      controlPort=config.torctlport,
-                              passphrase=None,
-        )
-
-        if conn is not None:
-            self._conn = conn
-            self._conn.set_events(events or ["BW"])
-        else:
-	    raise IOError("Unexpected error when attaching to tor.")
-
-    def __nonzero__(self):
-        """
-        Return True if tor is active and torCtl is currently attached to it,
-        False otherwise.
-        """
-        return self._conn.is_live()
-
-    def close(self):
-        """
-        Close tor process and listener.
-        """
-        if self:
-            self._conn.close()
-
-    def brandwith_event(self, event):
-        """
-        Log informations about current brandwidth.
-        """
-
-    def logtorevent(self, event):
-        """
-        Log informations about events on tor stream.
-        """
+    return url

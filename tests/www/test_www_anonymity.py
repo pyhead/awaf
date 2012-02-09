@@ -67,51 +67,23 @@ class TestTor(unittest.TestCase):
         Tests tor gived us a valid hiddenservice url.
         """
         url = tor.get_hiddenurl()
+        print url
         self.assertIsNotNone(url)
         self.assertTrue(url.endswith('.onion'))
         url, _ = url.split('.onion')
         self.assertEqual(len(url), 16)
         self.assertTrue(url.isalnum())
 
-	@tor.tor_running
-	def inner(cheese):
-	    """
-	    Useless function which returns its argument
-	    """
-	    return cheese
-
-	self.assertEqual(inner('cheese'), 'cheese')
-
-	#TODO: stop tor and see if it works.
-
-
-
-class TestTorListener(unittest.TestCase):
-    """
-    Test tor interface for event listeners.
-    """
-    
-    def setUp(self):
-	"""
-	Set up a simple torctl listener.
-	"""
-        print 'fooooooooo'
-	self.tor_listener = tor.TorListener()
-        print 'foooooooooooooo'
-
     def test_tor_running(self):
 	"""
 	Test tor_running decorator.
 	"""
+        @tor.tor_running
+        def inner(x):
+            return x
 
-    def test_bool(self):
-	"""
-	Assert the connection with tor is alive.
-	"""
-	self.assertTrue(self.tor_listener)
-	self.tor_listener.close()
-	self.assertFalse(self.tor_listener)
-    
+        self.assertIsNotNone(inner('cheese'))
+
 
 if __name__ == '__main__':
     unittest.main()
