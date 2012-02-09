@@ -9,7 +9,6 @@ from __future__ import with_statement
 import socket
 import subprocess
 import logging
-import errno
 import os.path
 
 import socks
@@ -19,11 +18,13 @@ from www import config
 logger = logging.getLogger('Tor Controller')
 logger.setLevel(logging.DEBUG)
 
-# We are all adults, G Van Rossum
-# tor current process pid
 __PID = None
 @property
 def pid(): 
+    """
+    We are all adults, Guido van Rossum
+    Return current tor process id.
+    """
     return __PID
 
 def once(func):
@@ -65,13 +66,13 @@ def start_tor():
                     hidport = config.hidport,
                     )
     try:
-	proc = subprocess.Popen(basecmd.split(),
+        proc = subprocess.Popen(basecmd.split(),
 	                        stdout=subprocess.PIPE,
 		                stderr=subprocess.PIPE)
     except OSError:
-	logger.error('Unable to lunch command %s. Please edit config' % 
+        logger.error('Unable to lunch command %s. Please edit config' % 
 		     config.torpath)
-	return None
+        return None
 
     for line in iter(proc.stdout.readline, ''):
         logger.debug(line)

@@ -1,5 +1,6 @@
-import os.path
-
+"""
+Simple Anonymous Web application Template.
+"""
 import tornado.ioloop
 
 from www import config, handlers
@@ -14,11 +15,6 @@ application = tornado.web.Application([
     (r"^/$", handlers.IndexHandler),
     (r"^/info/$", handlers.InfoHandler),
     (r"^/stats/$", handlers.StatsHandler),
-
-    (r"^/tip/([\d\w]{5})/$", handlers.TipHandler),
-    (r"^/tip/([\d\w]{5})/statistics$", handlers.TipHandler),
-    # fuck shit this regexp doesnt work XXX
-    (r"^/tip/([\d\w]{5})/comments/(\?([^#][\d\w]+))$", handlers.TipCommentsHandler),
     ],
     **settings
 )
