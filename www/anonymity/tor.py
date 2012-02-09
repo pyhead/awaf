@@ -4,9 +4,12 @@ Handle the web app anonymity:
     - start/stop/receive statistics about the current tor network;
     - create a new hidden node
 """
+from __future__ import with_statement
+
 import socket
 import subprocess
 import logging
+import os.path
 
 import socks
 from torctl import TorCtl
@@ -87,12 +90,37 @@ def tor_running(func):
         conn.close()
         return func
 
+#@tor_running
+#@classmethod
+def get_hiddenurl():
+    """
+    Retrive the onion url from hiddenservice directory specified in www.config.
+    Raise OSError in case of Failure, 
+    None if hiddenservice hostname seems corrupted.
+    """
+    with open(os.path.join(config.hiddir, 'hostname')) as f:
+        url = f.readline().strip()
 
-class TorListener(object, TorCtl.PostEventListener):
+    if not url or not url.endswith('.onion'):
+        return None
+    else:
+        return url
+
+def get_hiddenpkey():
+    with open(os.path.join(config.hiddir, 'hostname')) as f:
+        url = f.readline().strip()
+
+    if not url or not url.endswith('.onion'):
+        return None
+    else:
+        return url
+
+
+class TorListener(TorCtl.PostEventListener):
     """
     Listener for tor events.
     """
-    def __init__(self, events=None, pid=None):
+    def __init__(self, events=None):
         """
 	Create a new set of socket.
         """
@@ -103,7 +131,7 @@ class TorListener(object, TorCtl.PostEventListener):
 
         conn = TorCtl.connect(controlAddr='localhost',
                 	      controlPort=config.torctlport,
-                              passphrase=None
+                              passphrase=None,
         )
 
         if conn is not None:

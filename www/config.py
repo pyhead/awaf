@@ -6,7 +6,7 @@ Do not Change these unless you know what you are doing, fool.
 import os.path
 import logging
 
-basepath, _ = os.path.dirname(os.path.abspath(__file__)).rsplit('www', 1)
+basepath = os.path.dirname(os.path.abspath(__file__)).rsplit('www', 1)[0]
 
 # tor configuration
 torpath = 'tor'

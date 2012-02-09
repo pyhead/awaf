@@ -55,5 +55,10 @@ class TestWWWWApp(unittest.TestCase):
         self.assertEqual(self.response.request.url, self.urlfor(''))
         self.assertNotEqual(self.response.body, '')
 
+
+    def test_tor_exposed(self):
+        """
+        """
+
 if __name__ == '__main__':
     unittest.main()

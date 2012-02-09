@@ -1,3 +1,5 @@
+from __future__ import with_statement
+
 import unittest
 import urllib
 import httplib
@@ -60,22 +62,16 @@ class TestTor(unittest.TestCase):
         except socket.gaierrror, e:
             self.fail('Unable to connect: <%s>' % str(e))
 
-
-class TestTorListener(unittest.TestCase):
-    """
-    Test tor interface for event listeners.
-    """
-    
-    def setUp(self):
-	"""
-	Set up a simple torctl listener.
-	"""
-	self.tor_listener = tor.TorListener()
-
-    def test_tor_running(self):
-	"""
-	Test tor_running decorator.
-	"""
+    def test_hiddenurl(self):
+        """
+        Tests tor gived us a valid hiddenservice url.
+        """
+        url = tor.get_hiddenurl()
+        self.assertIsNotNone(url)
+        self.assertTrue(url.endswith('.onion'))
+        url, _ = url.split('.onion')
+        self.assertEqual(len(url), 16)
+        self.assertTrue(url.isalnum())
 
 	@tor.tor_running
 	def inner(cheese):
@@ -87,6 +83,26 @@ class TestTorListener(unittest.TestCase):
 	self.assertEqual(inner('cheese'), 'cheese')
 
 	#TODO: stop tor and see if it works.
+
+
+
+class TestTorListener(unittest.TestCase):
+    """
+    Test tor interface for event listeners.
+    """
+    
+    def setUp(self):
+	"""
+	Set up a simple torctl listener.
+	"""
+        print 'fooooooooo'
+	self.tor_listener = tor.TorListener()
+        print 'foooooooooooooo'
+
+    def test_tor_running(self):
+	"""
+	Test tor_running decorator.
+	"""
 
     def test_bool(self):
 	"""
