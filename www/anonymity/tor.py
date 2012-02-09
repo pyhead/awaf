@@ -13,7 +13,6 @@ import errno
 import os.path
 
 import socks
-from torctl import TorCtl
 
 from www import config
 
@@ -22,7 +21,11 @@ logger.setLevel(logging.DEBUG)
 
 # We are all adults, G Van Rossum
 # tor current process pid
-pid = None
+__PID = None
+@property
+def pid(): 
+    print __PID
+    return __PID
 
 def once(func):
     """
@@ -53,7 +56,7 @@ def start_tor():
     Return tor process' pid in case of success, None whether tor seems already running,
     False otherwise.
     """
-    global pid
+    global __PID
 
     basecmd = ('%(cmd)s -f %(torrc)s --HiddenServiceDir %(hiddir)s '
                '--HiddenServicePort %(hidport)d') % dict(
@@ -74,12 +77,12 @@ def start_tor():
     for line in iter(proc.stdout.readline, ''):
         logger.debug(line)
         if 'Bootstrapped 100%:' in line:
-            pid = proc.pid
+            __PID = proc.pid
             return proc.pid > 0
         if '[err]' in line:
             return False
     else:
-        pid = proc.pid
+        __PID = proc.pid
         return proc.pid > 0  # proc should have a pid < 0 in case of failure.
 
 @once

@@ -23,7 +23,7 @@ class TestTor(unittest.TestCase):
 	self.assertIsNone(tor.start_tor())
 
 	# TODO: do something in order to kill the process and restart it?
-        
+         
 	# brutally reset start_tor.has_run
         tor.start_tor.has_run = False
         self.assertFalse(tor.start_tor())
@@ -62,12 +62,11 @@ class TestTor(unittest.TestCase):
         except socket.gaierrror, e:
             self.fail('Unable to connect: <%s>' % str(e))
 
-    def test_hiddenurl(self):
+    def test_ziocanehiddenurl(self):
         """
         Tests tor gived us a valid hiddenservice url.
         """
         url = tor.get_hiddenurl()
-        print url
         self.assertIsNotNone(url)
         self.assertTrue(url.endswith('.onion'))
         url, _ = url.split('.onion')
