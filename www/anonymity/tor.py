@@ -16,7 +16,6 @@ import socks
 from www import config
 
 logger = logging.getLogger('Tor Controller')
-logger.setLevel(logging.DEBUG)
 
 __PID = None
 @property
@@ -26,6 +25,18 @@ def pid():
     Return current tor process id.
     """
     return __PID
+
+@pid.deleter
+def delpid():
+    """
+    __PID should be removed only when the application closes.
+    In any case, kill the current tor daemon.
+    """
+    global __PID
+
+    logger.debug('Killing tor process %d' % __PID)
+    os.kill(__PID)
+    __PID = None
 
 def once(func):
     """

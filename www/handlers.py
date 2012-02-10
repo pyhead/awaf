@@ -6,16 +6,17 @@ import json
 import tornado.web
 
 from www.anonymity import tor
+from www.node import nodehandler
 
 
 class IndexHandler(tornado.web.RequestHandler):
     """
     Template for Index handlers.
     """
-
     def get(self):
-        self.write('hello world!')
+        self.write('hello world')
 
+@nodehandler
 class InfoHandler(tornado.web.RequestHandler):
     """
     Return a JSONObject containing all informations about the node.
@@ -25,7 +26,13 @@ class InfoHandler(tornado.web.RequestHandler):
         """
         Fetch the node information from the core in json form, then return it.
         """
-        self.write('not implemented')
+        ret = json.dumps(dict(
+            name = self._node.name,
+            title = self._node.title,
+            description = self._node.description,
+            type = self._node.type,
+        ))
+        self.write(ret)
 
     def post(self):
         raise tornado.web.HTTPError(501)
@@ -33,6 +40,7 @@ class InfoHandler(tornado.web.RequestHandler):
     def delete(self):
         raise tornado.web.HTTPError(501)
 
+@nodehandler
 class StatsHandler(tornado.web.RequestHandler):
     """
     Display informations about the current tor status.
@@ -41,7 +49,7 @@ class StatsHandler(tornado.web.RequestHandler):
         return json.dumps(dict(
             tor_running = bool(torctl),
             hiddenservice_ip = torctl.hiddenip,
-        ))
+))
 
 class TipHandler(tornado.web.RequestHandler):
     """
