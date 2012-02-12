@@ -5,23 +5,41 @@ import tornado.httpclient
 import tornado.ioloop
 
 from www import app
+from www import config
+from www.anonymity import tor
 
 
-class TestWWWWApp(unittest.TestCase):
+class TestWWWApp(unittest.TestCase):
     """
     Test the web application for GlobaLeaks.
     """
 
-    port = 8888
+    def timed(func):
+        """
+        Testing on time delays is also important.
+        This function provides a decorator for tests which
+        needs a lag as short as possible.
+        """
+        def inner(*args, **kwargs):
+            time0 = time.time()
+            ret = func(*args, **kwargs)
+            time = time.time() - time0
+     
+    def __init__(self, *args, **kwargs):
+        """
+        Set up a mock server.
+        """ 
+        unittest.TestCase.__init__(self, *args, **kwargs)
+        
+        self.server = tornado.httpserver.HTTPServer(app.exapp)
+        # self.server.listen(config.hidport)
 
     def setUp(self):
         """
-        Set up a mock server.
+        Build a simple httpclient for testing
         """
-        self.server = tornado.httpserver.HTTPServer(app.application)
+        print 'ahahah'
         self.client = tornado.httpclient.AsyncHTTPClient()
-
-        self.server.listen(self.port)
 
     def tearDown(self):
         self.client.close()
@@ -30,7 +48,7 @@ class TestWWWWApp(unittest.TestCase):
         """
         Construct an url using keywords given.
         """
-        return 'http://localhost:%d/%s' % (self.port, '/'.join(page))
+        return 'http://localhost:%d/%s' % (config.hidport, '/'.join(page))
 
     def handle_request(self, message):
         """
@@ -49,6 +67,9 @@ class TestWWWWApp(unittest.TestCase):
         tornado.ioloop.IOLoop.instance().start()
 
     def test_index(self):
+        """
+        Default index page should be accessible and with something wriitten on it.
+        """
         self.fetch('')
 
         self.assertEqual(self.response.code, 200)
@@ -58,7 +79,17 @@ class TestWWWWApp(unittest.TestCase):
 
     def test_tor_exposed(self):
         """
+        An AWAF should be accessible also via its .onion domain.
         """
+        onionhname = tor.get_hiddenurl()
+        
+        self.client.fetch('%s:%d/' % (onionhname, config.hidport),
+                          self.handle_request)
+        tornado.ioloop.IOLoop.instance().start()
+        
+        self.assertEqual(self.response.code, 200)
+        self.assertTrue(self.response.body)
+
 
 if __name__ == '__main__':
     unittest.main()

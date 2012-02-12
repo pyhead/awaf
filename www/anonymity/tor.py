@@ -32,11 +32,8 @@ def delpid():
     __PID should be removed only when the application closes.
     In any case, kill the current tor daemon.
     """
-    global __PID
-
     logger.debug('Killing tor process %d' % __PID)
     os.kill(__PID)
-    __PID = None
 
 def once(func):
     """

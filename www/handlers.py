@@ -27,10 +27,10 @@ class InfoHandler(tornado.web.RequestHandler):
         Fetch the node information from the core in json form, then return it.
         """
         ret = json.dumps(dict(
-            name = self._node.name,
-            title = self._node.title,
-            description = self._node.description,
-            type = self._node.type,
+            name = self.node.name,
+            title = self.node.title,
+            description = self.node.description,
+            type = self.node.type,
         ))
         self.write(ret)
 
