@@ -8,6 +8,13 @@ from www import app
 from www import config
 from www.anonymity import tor
 
+# start tor
+tor.start_tor()
+tor.torsocks()
+
+# start tornado server
+server = tornado.httpserver.HTTPServer(app.exapp)
+server.listen(config.hidport)
 
 class TestWWWApp(unittest.TestCase):
     """
@@ -24,21 +31,11 @@ class TestWWWApp(unittest.TestCase):
             time0 = time.time()
             ret = func(*args, **kwargs)
             time = time.time() - time0
-     
-    def __init__(self, *args, **kwargs):
-        """
-        Set up a mock server.
-        """ 
-        unittest.TestCase.__init__(self, *args, **kwargs)
-        
-        self.server = tornado.httpserver.HTTPServer(app.exapp)
-        # self.server.listen(config.hidport)
 
     def setUp(self):
         """
         Build a simple httpclient for testing
         """
-        print 'ahahah'
         self.client = tornado.httpclient.AsyncHTTPClient()
 
     def tearDown(self):
@@ -83,7 +80,7 @@ class TestWWWApp(unittest.TestCase):
         """
         onionhname = tor.get_hiddenurl()
         
-        self.client.fetch('%s:%d/' % (onionhname, config.hidport),
+        self.client.fetch('http://%s:%d/' % (onionhname, config.hidport),
                           self.handle_request)
         tornado.ioloop.IOLoop.instance().start()
         

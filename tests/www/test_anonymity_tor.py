@@ -82,6 +82,22 @@ class TestTor(unittest.TestCase):
             return x
 
         self.assertIsNotNone(inner('cheese'))
+      
+    def test_dnsleak(self):
+        """
+        Tests host resolution is forwarded to the proxy.
+        This can be performed using tcpdump, i.e.:
+	    $ tcpdump -i [interface] 'udp port 53'
+	But this testsuite performs tests checking that .onion
+	domains are correctly resolved, since most dnses do not resolve .onions.
+        """
+        try:
+	    urllib.urlopen('http://duskgytldkxiuqc6.onion/')
+        except IOError, e:
+	    if e.errno == 'socket error':
+		self.fail('.onion domains are not resolved,'
+		          ' probably dns requests are not correctly forwarded')
+	    else: raise e
 
 
 if __name__ == '__main__':
