@@ -62,7 +62,7 @@ class TestTor(unittest.TestCase):
         except socket.gaierrror, e:
             self.fail('Unable to connect: <%s>' % str(e))
 
-    def test_ziocanehiddenurl(self):
+    def test_hiddenurl(self):
         """
         Tests tor gived us a valid hiddenservice url.
         """
