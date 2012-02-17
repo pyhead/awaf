@@ -91,12 +91,19 @@ class TestTor(unittest.TestCase):
 	But this testsuite performs tests checking that .onion
 	domains are correctly resolved, since most dnses do not resolve .onions.
         """
+        failmsg  = ('.onion domains are not resolved,'
+	            ' probably dns requests are not correctly forwarded')
+
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.connect(('duskgytldkxiuqc6.onion', 80))
+        except socket.gaierror:
+            self.fail(failmsg)
         try:
 	    urllib.urlopen('http://duskgytldkxiuqc6.onion/')
         except IOError, e:
 	    if e.errno == 'socket error':
-		self.fail('.onion domains are not resolved,'
-		          ' probably dns requests are not correctly forwarded')
+		self.fail(failmsg)
 	    else: raise e
 
 
