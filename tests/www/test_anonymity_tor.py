@@ -1,4 +1,4 @@
-from __future__ import with_statement
+from www.anonymity import tor
 
 import unittest
 import urllib
@@ -6,12 +6,9 @@ import httplib
 import socket
 import os
 
-import tornado.web
-
-from www.anonymity import tor
-
 tor.start_tor()
 tor.torsocks()
+
 
 class TestTor(unittest.TestCase):
     """
@@ -96,18 +93,17 @@ class TestTor(unittest.TestCase):
 	            ' probably dns requests are not correctly forwarded')
 
         self.assertNotEqual(socket.socket, socket._socketobject)
-        print socket.socket
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             s.connect(('duskgytldkxiuqc6.onion', 80))
         except socket.gaierror:
-            pass #self.fail(failmsg)
+            self.fail(failmsg)
 
-        try:
-            urllib.urlopen('http://duskgytldkxiuqc6.onion/')
-        except IOError, e:
-            if e.errno == 'socket error':
-                self.fail(failmsg)
+        # try:
+        #     urllib.urlopen('http://duskgytldkxiuqc6.onion/')
+        # except IOError, e:
+        #     if e.errno == 'socket error':
+        #         self.fail(failmsg)
 
 
 if __name__ == '__main__':
