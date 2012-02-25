@@ -90,7 +90,7 @@ class TestTor(unittest.TestCase):
         domains are correctly resolved, since most dnses do not resolve .onions.
         """
         failmsg  = ('.onion domains are not resolved,'
-	            ' probably dns requests are not correctly forwarded')
+    	            ' probably dns requests are not correctly forwarded')
 
         self.assertNotEqual(socket.socket, socket._socketobject)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -104,6 +104,8 @@ class TestTor(unittest.TestCase):
         # except IOError, e:
         #     if e.errno == 'socket error':
         #         self.fail(failmsg)
+        #     else:
+        #          raise e
 
 
 if __name__ == '__main__':

@@ -26,13 +26,12 @@ class InfoHandler(tornado.web.RequestHandler):
         """
         Fetch the node information from the core in json form, then return it.
         """
-        ret = json.dumps(dict(
+        self.write(json.dumps(dict(
             name = self.node.name,
             title = self.node.title,
             description = self.node.description,
             type = self.node.type,
-        ))
-        self.write(ret)
+        )))
 
     def post(self):
         raise tornado.web.HTTPError(501)
@@ -49,7 +48,7 @@ class StatsHandler(tornado.web.RequestHandler):
         return json.dumps(dict(
             tor_running = bool(torctl),
             hiddenservice_ip = torctl.hiddenip,
-))
+        ))
 
 class TipHandler(tornado.web.RequestHandler):
     """
