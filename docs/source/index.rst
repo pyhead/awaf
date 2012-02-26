@@ -12,10 +12,6 @@ Contents:
    :maxdepth: 2
 
    intro
-   architecture
-   rest
-   GLBackend
-   GLClient
 
 Indices and tables
 ==================
