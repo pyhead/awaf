@@ -13,13 +13,13 @@ import os.path
 
 import socks
 
-from www import config
+from awaf import config
 
 logger = logging.getLogger('Tor Controller')
 
 __PID = None
 @property
-def pid(): 
+def pid():
     """
     We are all adults, Guido van Rossum
     Return current tor process id.
@@ -78,7 +78,7 @@ def start_tor():
 	                        stdout=subprocess.PIPE,
 		                stderr=subprocess.PIPE)
     except OSError:
-        logger.error('Unable to lunch command %s. Please edit config' % 
+        logger.error('Unable to lunch command %s. Please edit config' %
 		     config.torpath)
         return None
 
@@ -97,7 +97,7 @@ def start_tor():
 def torsocks():
     """
     Change socket.socket to a socksproxy binded to tor proxy.
-    If the operation succeeds, return True, 
+    If the operation succeeds, return True,
     """
     socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "localhost", config.torport)
     socket.socket = socks.socksocket
@@ -106,8 +106,8 @@ def torsocks():
 @tor_running
 def get_hiddenurl():
     """
-    Retrive the onion url from hiddenservice directory specified in www.config.
-    Raise OSError in case of Failure, 
+    Retrive the onion url from hiddenservice directory specified in awaf.config.
+    Raise OSError in case of Failure,
     None if hiddenservice hostname seems corrupted.
     """
     with open(os.path.join(config.hiddir, 'hostname')) as f:

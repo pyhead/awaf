@@ -7,10 +7,10 @@ import os.path
 import logging
 import sys
 
-basepath = os.path.dirname(os.path.abspath(__file__)).rsplit('www', 1)[0]
+basepath = os.path.dirname(os.path.abspath(__file__)).rsplit('awaf', 1)[0]
 
-# extend pythonpath with www/ and site-packages/
-sys.path.append(os.path.join(basepath, 'www'))
+# extend pythonpath with awaf/ and site-packages/
+sys.path.append(os.path.join(basepath, 'awaf'))
 sys.path.append(os.path.join(basepath, 'site-packages'))
 
 # tor configuration

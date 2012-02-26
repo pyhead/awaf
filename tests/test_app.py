@@ -4,9 +4,9 @@ import tornado.httpserver
 import tornado.httpclient
 import tornado.ioloop
 
-from www import app
-from www import config
-from www.anonymity import tor
+from awaf import app
+from awaf import config
+from awaf.anonymity import tor
 
 # start tor
 tor.start_tor()
@@ -16,7 +16,7 @@ tor.torsocks()
 server = tornado.httpserver.HTTPServer(app.exapp)
 server.listen(config.hidport)
 
-class TestWWWApp(unittest.TestCase):
+class TestawafApp(unittest.TestCase):
     """
     Test the web application for GlobaLeaks.
     """
@@ -45,7 +45,7 @@ class TestWWWApp(unittest.TestCase):
         """
         Construct an url using keywords given.
         """
-        return 'http://localhost:%d/%s' % (config.hidport, '/'.join(page))
+        return 'http://127.0.0.1:%d/%s' % (config.hidport, '/'.join(page))
 
     def handle_request(self, message):
         """
@@ -65,25 +65,23 @@ class TestWWWApp(unittest.TestCase):
 
     def test_index(self):
         """
-        Default index page should be accessible and with something wriitten on it.
+        Default index page should be accessible and with something written on it.
         """
         self.fetch('')
 
-        self.assertEqual(self.response.code, 200)
         self.assertEqual(self.response.request.url, self.urlfor(''))
         self.assertNotEqual(self.response.body, '')
-
 
     def test_tor_exposed(self):
         """
         An AWAF should be accessible also via its .onion domain.
         """
         onionhname = tor.get_hiddenurl()
-        
+
         self.client.fetch('http://%s:%d/' % (onionhname, config.hidport),
                           self.handle_request)
         tornado.ioloop.IOLoop.instance().start()
-        
+
         self.assertEqual(self.response.code, 200)
         self.assertTrue(self.response.body)
 

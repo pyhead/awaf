@@ -5,9 +5,9 @@ import logging
 
 import tornado.ioloop
 
-from www import config, handlers
-from www.anonymity import tor
-from www.node import Node
+from awaf import config, handlers
+from awaf.anonymity import tor
+from awaf.node import Node
 
 stdsett = dict(
         static_path = config.staticpath,
@@ -20,7 +20,7 @@ node = Node(
      type='gangbang',
 )
 
-# an anonymous application should have at least 
+# an anonymous application should have at least
 # these small configurable components
 exapp = tornado.web.Application([
     (r"^/$", handlers.IndexHandler),
@@ -46,7 +46,7 @@ def main(application):
     tor.torsocks()
     tor.start_tor()
 
-    # launch web app    
+    # launch web app
     try:
         application.listen(config.hidport)
         tornado.ioloop.IOLoop.instance().start()

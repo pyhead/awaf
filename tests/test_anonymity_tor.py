@@ -1,4 +1,4 @@
-from www.anonymity import tor
+from awaf.anonymity import tor
 
 import unittest
 import urllib

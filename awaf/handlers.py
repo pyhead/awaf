@@ -5,8 +5,8 @@ import json
 
 import tornado.web
 
-from www.anonymity import tor
-from www.node import nodehandler
+from awaf.anonymity import tor
+from awaf.node import nodehandler
 
 
 class IndexHandler(tornado.web.RequestHandler):

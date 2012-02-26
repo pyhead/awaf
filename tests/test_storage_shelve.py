@@ -2,7 +2,7 @@ import unittest
 import tempfile
 import os
 
-from www.storage import shelvedb
+from awaf.storage import shelvedb
 
 class TestShelveStorage(unittest.TestCase):
 
